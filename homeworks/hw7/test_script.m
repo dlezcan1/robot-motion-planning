@@ -60,5 +60,21 @@ disp(' ');
 %% GJKalg_2D test
 disp('ClosestPointonTriangleToOrigin Test');
 
+disp('Triangle 1 and Triangle 1');
+GJKalg_2D(triangle1, triangle1)
+
+disp('Triangle 2 and Triangle 2');
+GJKalg_2D(triangle1, triangle1)
+
+disp('Triangle 1 and Triangle 2');
+GJKalg_2D(triangle1, triangle2)
+
+disp('Triangle 2 and Triangle 1');
+GJKalg_2D(triangle2, triangle1)
+%%
+disp('Triangle 3 and Triangle 1');
+triangle3 = triangle2 + [-1; 0];
+GJKalg_2D(triangle3, triangle1)
 
 disp('Program completed.');
+

@@ -18,7 +18,7 @@ function [closest_pt, vor, edge] = ClosestPointOnTriangleToOrigin(triangle)
     %% Determine if origin is in Voronoi Regions
     vor.a = (dot(line_ab, -triangle(:,1)) <= 0) & (dot(line_ac, -triangle(:,1)) <= 0);
     vor.b = (dot(line_bc, -triangle(:,2)) <= 0) & (dot(line_ba, -triangle(:,2)) <= 0);
-    vor.c = (dot(line_ca, -triangle(:,3)) <= 0) & (dot(line_cb, triangle(:,3)) <= 0);
+    vor.c = (dot(line_ca, -triangle(:,3)) <= 0) & (dot(line_cb, -triangle(:,3)) <= 0);
             
     %% Determine if origin is in edge regions
     % E_AB
@@ -42,11 +42,11 @@ function [closest_pt, vor, edge] = ClosestPointOnTriangleToOrigin(triangle)
     elseif vor.c
         closest_pt = triangle(:,3);
     elseif edge.ab
-        closest_pt = (eye(2) - line_ba * line_ba'/dot(line_ba, line_ba)) * triangle(:,2);
+        closest_pt = (eye(2) - line_ba * line_ba'/dot(line_ba, line_ba)) * triangle(:,1);
     elseif edge.bc
-        closest_pt = (eye(2) - line_cb * line_cb'/dot(line_cb, line_cb)) * triangle(:,3);
+        closest_pt = (eye(2) - line_cb * line_cb'/dot(line_cb, line_cb)) * triangle(:,2);
     elseif edge.ca
-        closest_pt = (eye(2) - line_ac * line_ac'/dot(line_ac, line_ac)) * triangle(:,1);
+        closest_pt = (eye(2) - line_ac * line_ac'/dot(line_ac, line_ac)) * triangle(:,3);
     else % inside the triangle
         closest_pt = [0; 0];
     end
