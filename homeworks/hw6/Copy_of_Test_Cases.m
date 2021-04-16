@@ -11,11 +11,17 @@ A0 = 0.5.*O{1,1};
 % please investigate how entries of q contribute to the C-obstacles!
 % (hint: now all entries are useful)
 q = [1,1,0.2]';
+R = [cos(q(3)), -sin(q(3)); sin(q(3)), cos(q(3))];
+Aq = R * A0;
 
 %%%%%%%%%%%TODO%%%%%%%%%%%%%%
 % Write your own fn_c_obstacles(O,A0,q)
 % Notice: do not change the function name!
 [Co]= fn_c_obstacles(O,A0,q); 
+[Co1] = brute_minkowski_diff(O{1}, Aq);
+[Co2] = brute_minkowski_diff(O{2}, Aq);
+% Co = {Co1, Co2};
+
 
 % Display answer and plot
 disp('Cobs Solution:')
