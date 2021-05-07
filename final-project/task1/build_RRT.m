@@ -126,7 +126,7 @@ function colliding = collision_check_line(q1, q2, S, dq)
     end
     
     % generate the sample q's along this line
-    q_checks = q1 + linspace(0, 1, dq).*(q2 - q1);
+    q_checks = q1 + [0:dq:1].*(q2 - q1);
     
     % initialization
     colliding = false;
