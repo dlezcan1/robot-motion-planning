@@ -18,7 +18,7 @@
 
 
 function [path, V, E, G] = build_PRM(qI, qG, NumNodes, K, random_state_gen, ...
-                                      S, dist_metric, obs_detect_dq)
+                                      S, dist_metric, options)
     %% Arguments Block
     arguments
         qI (:,1);
@@ -28,7 +28,8 @@ function [path, V, E, G] = build_PRM(qI, qG, NumNodes, K, random_state_gen, ...
         random_state_gen;
         S struct;
         dist_metric = 'euclidean';
-        obs_detect_dq double = 0.1;
+        options.obstacle_dq double = 0.01;
+        options.line_wraparound logical = true;
     end
     
     % Argument checking
@@ -46,7 +47,7 @@ function [path, V, E, G] = build_PRM(qI, qG, NumNodes, K, random_state_gen, ...
        qrand = random_state_gen();
        
        % check for collision
-       colliding = collision_check_point(qrand, obstacles);
+       colliding = collision_detection(qrand, S);
        if ~colliding
            G = G.addnode(1);
            G.Nodes.q(end,:) = qrand';
@@ -73,7 +74,8 @@ function [path, V, E, G] = build_PRM(qI, qG, NumNodes, K, random_state_gen, ...
            end
                       
            % check for collision
-           colliding = collision_check_line(q_j, q_idx, S, obs_d);
+           colliding = collision_check_line(q_j, q_idx, S, options.obstacle_dq,...
+                            'wraparound', options.line_wraparound);
                       
            % add edge between q_j and q_idx
            if ~colliding
@@ -95,30 +97,4 @@ function [path, V, E, G] = build_PRM(qI, qG, NumNodes, K, random_state_gen, ...
     V = G.Nodes.q';
     E = full(G.adjacency);
     
-end
-
-%% Helper functions
-% sample points along a line (in C-Space) to check for a collision
-function colliding = collision_check_line(q1, q2, S, dq)
-    arguments
-        q1 (:,1);
-        q2 (:,1);
-        S struct;
-        dq double = 0.1;
-    end
-    
-    % generate the sample q's along this line
-    q_checks = q1 + [0:dq:1].*(q2 - q1);
-    
-    % initialization
-    colliding = false;
-    
-    % iterate through all of the sample q's
-    for i = 1:size(q_checks, 2)
-        % check for collision
-        if collision_detection(q_checks(:,i), S)
-            colliding = true;
-            return;
-        end
-    end
 end

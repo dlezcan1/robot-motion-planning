@@ -20,7 +20,7 @@
 %   - The MATLAB graph representation of the built RRT graph
 
 function [path, V, E, G] = build_RRT(qI, qG, NumNodes, dq, random_state_gen, ...
-                                     S, q_bound_fn, dist_metric, epsilon)
+                                     S, q_bound_fn, dist_metric, epsilon, options)
     %% Arguments Block
     arguments
         qI (:,1);
@@ -32,6 +32,7 @@ function [path, V, E, G] = build_RRT(qI, qG, NumNodes, dq, random_state_gen, ...
         q_bound_fn;
         dist_metric = @(X,x) vecnorm(X - x, 2, 2);
         epsilon double = dq;
+        options.wraparound logical = true;
     end
     
     %% Initialize the Graph
@@ -55,7 +56,8 @@ function [path, V, E, G] = build_RRT(qI, qG, NumNodes, dq, random_state_gen, ...
         end
         
         % collision checking
-        colliding = collision_check_line(qnear, qnew, S, dq);
+        colliding = collision_check_line(qnear, qnew, S, dq, ...
+                        'wraparound', options.wraparound);
         if colliding
             continue;
         end
@@ -64,9 +66,12 @@ function [path, V, E, G] = build_RRT(qI, qG, NumNodes, dq, random_state_gen, ...
         G = G.addedge(qnear_idx, size(G.Nodes, 1));
         
         % check to see if we are close enough to the edge
-        if norm(qnear - qG) < epsilon
+%         if dist_metric(qnear', qG') < epsilon
+        % check to see if we can connect the edge
+        if ~collision_check_line(qnew, qG, S, dq, 'wraparound', options.wraparound)
             G = G.addnode(table(qG', 'VariableNames', {'q'}));
-            G = G.addedge(qnear_idx, size(G.Nodes, 1));
+            qnew_idx = find(all(G.Nodes.q == qnew',2));
+            G = addedge(G, qnew_idx, size(G.Nodes, 1));
             break;
         end
     end
@@ -94,7 +99,7 @@ function [qnear, min_idx, min_dist] = nearest_config(G, q, dist_metric)
         dist_metric;
     end
     
-    dists = dist_metric(G.Nodes.q', q);
+    dists = dist_metric(q', G.Nodes.q);
     
     [min_dist, min_idx] = min(dists);
     
@@ -113,30 +118,6 @@ function qnew = step_config(qnear, qrand, dq, q_bound_fn)
     qnew = qnear + dq * (qrand - qnear)/norm(qrand - qnear);
     
     qnew = q_bound_fn(qnew);
+    qnew = qrand;
     
 end
-
-% sample points along a line (in C-Space) to check for a collision
-function colliding = collision_check_line(q1, q2, S, dq)
-    arguments
-        q1 (:,1);
-        q2 (:,1);
-        S struct;
-        dq double = 0.1;
-    end
-    
-    % generate the sample q's along this line
-    q_checks = q1 + [0:dq:1].*(q2 - q1);
-    
-    % initialization
-    colliding = false;
-    
-    % iterate through all of the sample q's
-    for i = 1:size(q_checks, 2)
-        % check for collision
-        if collision_detection(q_checks(:,i), S)
-            colliding = true;
-            return;
-        end
-    end
-end 
