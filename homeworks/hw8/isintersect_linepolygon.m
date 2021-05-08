@@ -11,7 +11,7 @@
 %
 % - written by: Dimitri Lezcano
 
-function does_intersect = isintersect_linepolygon(P, q_line)
+function [does_intersect, tE, tL] = isintersect_linepolygon(P, q_line)
     %% arugments block
     arguments
         P (2,:);
@@ -25,6 +25,7 @@ function does_intersect = isintersect_linepolygon(P, q_line)
     
     % determine -90 deg rotation
     R = [0 1; -1 0];
+    P = P(:, [1:end, 1]);
     
     %% Check for single point
     if all(q0 == q1)
@@ -39,15 +40,12 @@ function does_intersect = isintersect_linepolygon(P, q_line)
         
         % iterate through the edges
         for i = 1:size(P, 2)-1
-            % grab the points
-            p_ip1 = P(:,i+1); p_i = P(:,i);
-            
             % grab the edge and outward normal
-            e_i = p_ip1 - p_i;
+            e_i = P(:,i+1) - P(:,i);
             n_i = R * e_i;
             
             % Computational test
-            N = -dot(q_0 - p_i, n_i);
+            N = -dot(q0 - P(:,i), n_i);
             D = dot(ds, n_i);
             
             % first check (D = 0 | approximation)
@@ -68,7 +66,7 @@ function does_intersect = isintersect_linepolygon(P, q_line)
                 
             else % D > 0
                 tL = min(tL, t);
-                if tE > tL
+                if tL < tE
                     does_intersect = false;
                     return;
                 end
