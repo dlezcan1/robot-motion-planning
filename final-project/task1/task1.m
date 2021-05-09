@@ -95,8 +95,46 @@ function task1
     pO = plot_obstacles(obs, 'color', 'black'); hold on;
     grid on;
     xlabel('x'); ylabel('y');
-    legend([pI, pG, pO], 'start', 'goal', 'obstacles', 'test');
+    legend([pI, pG, pO], 'start', 'goal', 'obstacles');
     hold off;
+    
+    % RRT
+    if ~isempty(path_rrt)
+        fig_rrt_all = figure(2);
+        for i = 1:size(path_rrt,2)
+            p_config = plot_robot(path_rrt(:,i), S.link_len, 'linespec', 'k-o'); hold on;
+        end
+        pI = plot_robot(qI, S.link_len, 'linespec', 'b-o'); hold on;
+        pG = plot_robot(qG, S.link_len, 'linespec', 'g-o'); hold on;
+        pO = plot_obstacles(obs, 'color', 'black'); hold on;
+        
+        grid on;
+        xlabel('x'); ylabel('y');
+        legend([pI, pG, pO, p_config], 'start', 'goal', 'obstacles', 'configurations');
+        hold off;
+        title("Task 1: RRT Results");
+        
+        saveas(fig_rrt_all, 'T1_rrt_results.png');
+    end
+    
+    % PRM
+    if ~isempty(path_prm)
+        fig_rrt_all = figure(3);
+        for i = 1:size(path_prm,2)
+            p_config = plot_robot(path_prm(:,i), S.link_len, 'linespec', 'k-o'); hold on;
+        end
+        pI = plot_robot(qI, S.link_len, 'linespec', 'b-o'); hold on;
+        pG = plot_robot(qG, S.link_len, 'linespec', 'g-o'); hold on;
+        pO = plot_obstacles(obs, 'color', 'black'); hold on;
+        
+        grid on;
+        xlabel('x'); ylabel('y');
+        legend([pI, pG, pO, p_config], 'start', 'goal', 'obstacles', 'configurations');
+        hold off;
+        title("Task 1: PRM Results")
+        
+        saveas(fig_rrt_all, 'T1_prm_results.png');
+    end 
     
     pause(1);
     %% Movies
